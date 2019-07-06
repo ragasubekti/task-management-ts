@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "../mongoose";
+import { Schema } from "mongoose";
 
 const UserModelSchema = new Schema({
   username: String,
@@ -7,3 +8,5 @@ const UserModelSchema = new Schema({
 });
 
 const UserModel = mongoose.model("User", UserModelSchema);
+
+export default UserModel;
