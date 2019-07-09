@@ -1,15 +1,10 @@
 import { Response } from "express";
 import { AuthorizationRequest } from "../middlewares/Authorization";
-import TaskModel from "../models/TaskModel";
+import TaskModel, { ITaskModel } from "../models/TaskModel";
+import { Document } from "mongoose";
 
 export const CreateTask = async (req: AuthorizationRequest, res: Response) => {
   const { name, description, dueDate, isCompleted } = req.body;
-
-  // if (req.decoded.isManager) {
-  //   return res.status(400).send({
-  //     message: "You're not allowed to create task"
-  //   });
-  // }
 
   try {
     const create = await new TaskModel({
@@ -46,6 +41,57 @@ export const GetTask = async (req: AuthorizationRequest, res: Response) => {
     return res.send({
       message: "Successfully Retrieved Task List",
       data: task
+    });
+  }
+
+  const task = await TaskModel.find({
+    asignedTo: req.decoded.id
+  });
+
+  return res.send({
+    message: "Successfully Retrieved Task List",
+    data: task
+  });
+};
+
+export const CompleteTask = async (
+  req: AuthorizationRequest,
+  res: Response
+) => {
+  const taskId = req.params.id;
+
+  try {
+    const task: any = await TaskModel.findOne({
+      _id: taskId
+    })
+      .populate("asignedTo", "name username")
+      .populate("creator", "name username");
+
+    // console.log(task.creator);
+
+    if (!task) {
+      return res.status(404).send({
+        message: "Not found"
+      });
+    }
+
+    if (task && task.creator._id == req.decoded.id) {
+      const update = await TaskModel.updateOne(task, {
+        isCompleted: true
+      });
+
+      return res.send({
+        message: "Successfully Completed "
+      });
+    } else {
+      return res.status(401).send({
+        message: `You're not allowed to do this`
+      });
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(500).send({
+      message: "Unknown error"
     });
   }
 };
