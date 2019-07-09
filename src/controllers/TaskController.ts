@@ -95,3 +95,71 @@ export const CompleteTask = async (
     });
   }
 };
+
+export const UpdateTask = async (req: AuthorizationRequest, res: Response) => {
+  try {
+    const task: any = await TaskModel.findOne({
+      _id: req.params.id
+    });
+
+    if (!task) {
+      return res.status(404).send({
+        message: "Cannot find task"
+      });
+    }
+
+    if (task && task.creator == req.decoded.id) {
+      const { name, description, dueDate } = req.body;
+
+      const update = await TaskModel.updateOne(task, {
+        name,
+        description,
+        dueDate
+      });
+
+      return res.status(201).send({
+        message: "Successfully Updated Task"
+      });
+    } else {
+      return res.status(401).send({
+        message: `You don't have priviledge to do that`
+      });
+    }
+  } catch (e) {
+    res.status(500).send({
+      message: "Unknown Error"
+    });
+  }
+};
+
+export const DeleteTask = async (req: AuthorizationRequest, res: Response) => {
+  try {
+    const task: any = await TaskModel.findOne({
+      _id: req.params.id
+    });
+
+    if (!task) {
+      return res.status(404).send({
+        message: "Task not found"
+      });
+    }
+
+    if (task && task.creator == req.decoded.id) {
+      const update = await TaskModel.deleteOne({
+        _id: req.params.id
+      });
+
+      return res.status(201).send({
+        message: "Successfully Deleted Task"
+      });
+    } else {
+      return res.status(401).send({
+        message: `You don't have priviledge to do that`
+      });
+    }
+  } catch (e) {
+    res.status(500).send({
+      message: "Unknown Error"
+    });
+  }
+};
