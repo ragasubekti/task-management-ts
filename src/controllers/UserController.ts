@@ -105,10 +105,12 @@ export const SetupManager = async (req: Request, res: Response) => {
 
     const create = await new UserModel({
       username: "manager",
-      password: "manager",
+      password: passwordHash,
       name: "XCIDIC Task Manager",
       isManager: true
-    });
+    }).save();
+
+    // console.lFog(create);
 
     return res.status(201).send({
       message: "Successfully Registered Manager"
