@@ -87,3 +87,35 @@ export const Login = async (req: Request, res: Response) => {
     token
   });
 };
+
+export const SetupManager = async (req: Request, res: Response) => {
+  try {
+    const checkManager = await UserModel.findOne({
+      username: "manager"
+    });
+
+    if (checkManager) {
+      return res.status(422).send({
+        message: "Manager already exists"
+      });
+    }
+
+    const salt = await genSaltSync(7);
+    const passwordHash = await hashSync("manager", salt);
+
+    const create = await new UserModel({
+      username: "manager",
+      password: "manager",
+      name: "XCIDIC Task Manager",
+      isManager: true
+    });
+
+    return res.status(201).send({
+      message: "Successfully Registered Manager"
+    });
+  } catch (e) {
+    return res.status(500).send({
+      message: `Oops! There's an error on our end`
+    });
+  }
+};
