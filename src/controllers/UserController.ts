@@ -15,7 +15,7 @@ export const Register = async (req: Request, res: Response) => {
     });
   }
 
-  const { username, password } = req.body;
+  const { name, username, password } = req.body;
 
   const findSameUsername = await UserModel.findOne({
     username
@@ -31,6 +31,7 @@ export const Register = async (req: Request, res: Response) => {
   const passwordHash = await hashSync(password, salt);
 
   const createUser = await new UserModel({
+    name,
     username,
     password: passwordHash,
     isManager: false
@@ -67,7 +68,7 @@ export const Login = async (req: Request, res: Response) => {
   const checkHash = await compareSync(password, account.password);
 
   if (!checkHash) {
-    return res.status(201).send({
+    return res.status(401).send({
       message: `Password doesn't match to our database`
     });
   }
@@ -75,7 +76,8 @@ export const Login = async (req: Request, res: Response) => {
   const token = await jwt.sign(
     {
       id: account._id,
-      isManager: account.isManager
+      isManager: account.isManager,
+      name: account.name
     },
     process.env.JWT_SECRET || "xcidic"
   );

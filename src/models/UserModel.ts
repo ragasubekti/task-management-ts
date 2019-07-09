@@ -3,6 +3,7 @@ import { Schema, Document } from "mongoose";
 
 const UserModelSchema = new Schema(
   {
+    name: String,
     username: String,
     password: String,
     isManager: Boolean
@@ -12,6 +13,7 @@ const UserModelSchema = new Schema(
 
 export interface IUserModel extends Document {
   _id: string;
+  name: string;
   username: string;
   password: string;
   isManager: boolean;

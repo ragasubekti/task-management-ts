@@ -5,18 +5,19 @@ import TaskModel from "../models/TaskModel";
 export const CreateTask = async (req: AuthorizationRequest, res: Response) => {
   const { name, description, dueDate, isCompleted } = req.body;
 
-  if (req.decoded.isManager) {
-    return res.status(400).send({
-      message: "You're not allowed to create task"
-    });
-  }
+  // if (req.decoded.isManager) {
+  //   return res.status(400).send({
+  //     message: "You're not allowed to create task"
+  //   });
+  // }
 
   try {
     const create = await new TaskModel({
       name,
       description,
       dueDate,
-      owner: req.decoded.id,
+      asignedTo: req.decoded.id,
+      creator: req.decoded.id,
       isCompleted: isCompleted || false
     }).save();
 
@@ -32,6 +33,19 @@ export const CreateTask = async (req: AuthorizationRequest, res: Response) => {
   } catch (e) {
     return res.status(500).send({
       message: e
+    });
+  }
+};
+
+export const GetTask = async (req: AuthorizationRequest, res: Response) => {
+  if (req.decoded.isManager) {
+    const task = await TaskModel.find()
+      .populate("asignedTo", "name username")
+      .populate("creator", "name username");
+
+    return res.send({
+      message: "Successfully Retrieved Task List",
+      data: task
     });
   }
 };
